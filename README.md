@@ -14,3 +14,5 @@ Użytkownik może:
 - Pobrać listę komputerów obsługujących protokół Rumba
 - Wyświetlić listę plików i katalogów na danym komputerze
 - Pobrać plik
+
+Do roboty
