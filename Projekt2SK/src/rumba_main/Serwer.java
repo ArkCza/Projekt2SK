@@ -21,7 +21,7 @@ public class Serwer {
 		byte[] inBuf, outBuf;
 		String msg;
 		final int PORT = 50000;
-		
+		int X; //USUÑ TO
 		try {
 			
 			socket = new DatagramSocket(PORT);

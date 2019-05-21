@@ -12,6 +12,7 @@ public class Klient {
 		byte[] inBuf, outBuf;
 		String msg = null;
 		final int PORT = 50000;
+		int X; //USUÑ TO
 		Scanner src = new Scanner(System.in);
 		try {
 			InetAddress address = InetAddress.getByName("127.0.0.1");
