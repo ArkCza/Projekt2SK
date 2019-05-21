@@ -25,7 +25,7 @@ public class Serwer {
 		try {
 			
 			socket = new DatagramSocket(PORT);
-			
+			// edit
 			while(true) {
 				
 				System.out.println("\nRunning...\n");
