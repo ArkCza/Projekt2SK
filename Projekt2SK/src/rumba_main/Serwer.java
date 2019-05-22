@@ -16,16 +16,15 @@ public class Serwer {
 	public static void main(String[] args) {
 		
 		DatagramSocket socket = null;
-		DatagramPacket inPacket = null; //recieving packet
+		DatagramPacket inPacket = null; //receiving packet
 		DatagramPacket outPacket = null; //sending packet
 		byte[] inBuf, outBuf;
 		String msg;
 		final int PORT = 50000;
-		int X; //USUÑ TO
 		try {
 			
 			socket = new DatagramSocket(PORT);
-			// edit
+			
 			while(true) {
 				
 				System.out.println("\nRunning...\n");
