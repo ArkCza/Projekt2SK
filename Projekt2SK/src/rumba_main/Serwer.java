@@ -1,4 +1,4 @@
-//Sends all types of files within UDP Packe size limit
+//Sends all types of files within UDP Package size limit
 
 package rumba_main;
 
