@@ -9,7 +9,7 @@ public class Klient {
 	public static void main(String[] args) {
 		
 		DatagramSocket socket = null;
-		DatagramPacket inPacket = null; //recieving packet
+		DatagramPacket inPacket = null; //receiving packet
 		DatagramPacket outPacket = null; //sending packet
 		byte[] inBuf, outBuf;
 		String msg = null;
