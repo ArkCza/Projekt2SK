@@ -38,7 +38,7 @@ public class Serwer {
 				msg = new String(inPacket.getData(), 0, inPacket.getLength());
 				System.out.println("Client: "+source_address + ":" + source_port);
 				
-				String dirname="/media/";
+				String dirname="/media/projekt/";
 				File f1=new File(dirname);
 				File fl[]=f1.listFiles();
 				
