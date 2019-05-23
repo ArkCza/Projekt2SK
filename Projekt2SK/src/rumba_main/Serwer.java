@@ -1,5 +1,10 @@
 //Sends all types of files within UDP Package size limit
 
+/*TODO
+-Klient podaje udostępniany katalog
+-Serwer przechowuje liste klientów do niego podłączonych
+-Menu: lista klientów->wybór klienta->wybór pliku->pobiera lub wyloguj  (switch case)
+*/
 package rumba_main;
 
 
@@ -36,7 +41,7 @@ public class Serwer {
 				int source_port = inPacket.getPort();
 				InetAddress source_address = inPacket.getAddress();
 				msg = new String(inPacket.getData(), 0, inPacket.getLength());
-				System.out.println("Client: "+source_address + ":" + source_port);
+				System.out.println("Client: "+source_address + " : " + source_port);
 				
 				String dirname="/media/projekt/";
 				File f1=new File(dirname);
