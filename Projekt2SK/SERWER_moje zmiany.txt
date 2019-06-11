@@ -4,133 +4,97 @@ package rumba_main;
 
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.List;
+import java.util.ArrayList;
 
-public class Serwer {
+public class Serwer implements Runnable {
 	
 	public static void main(String[] args) {
-		
 		DatagramSocket socket = null;
 		DatagramPacket inPacket = null; //recieving packet
 		DatagramPacket outPacket = null; //sending packet
-		
 		byte[] inBuf, outBuf;
-		
-		String msg,user,chosen_address="",login,oneuser,chosen_dir="";
-		
+		String msg,user,chosen_address="",chosen_dir="",login,oneuser,reponse="";
 		int chosen_port=0,rozm;
-		
-		List<String> logins =  null;
-		List<Integer> ports = null;
-		List<String> addresses = null;
-		List<String> users = null;
-		List<String> directories = null;
-		
+		List<Integer> ports = new ArrayList<Integer>();
+		List<String> logins = new ArrayList<String>();
+		List<String> addresses = new ArrayList<String>();
+		List<String> users = new ArrayList<String>();
+		List<String> directories = new ArrayList<String>();
 		final int PORT = 50000;
 		StringBuilder sbuild = null;
+		int BUFFERSIZE=5000;
+		
 		
 		try {
 			
 			socket = new DatagramSocket(PORT);
-			// edit
+			//while(true) {
+				
+			System.out.println("\nRunning...\n");
+				
+			inBuf = new byte[BUFFERSIZE];
+			inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie pustego stringa
+			socket.receive(inPacket);
+			int source_port = inPacket.getPort();
+			Integer sport = Integer.valueOf(source_port);
+			System.out.println(sport);
+			InetAddress source_address = inPacket.getAddress();
+			System.out.println(source_address);
+			addresses.add(source_address.toString());
+			msg = new String(inPacket.getData(), 0, inPacket.getLength()); //przypisanie do zmiennej msg na serwerze - nawiazanie polaczenia
+			
+			
+			inBuf = new byte[BUFFERSIZE];
+			inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie loginu
+			socket.receive(inPacket);
+			login = new String(inPacket.getData(), 0, inPacket.getLength());
+			logins.add(login);
+			
+			for(int i=0;i<logins.size();i++) {
+				user="Client - "+(String)logins.get(i)+" : "+(String)addresses.get(i)+":"+50000;
+				System.out.println(user); //wyswietlanie listy klientow
+				users.add(user);
+			}
 			while(true) {
 				
-				System.out.println("\nRunning...\n");
 				
-				inBuf = new byte[100];
-				System.out.println("\n 1...\n");
-				inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie pustego stringa
-				System.out.println("2...\n");
-				socket.receive(inPacket);
-				System.out.println("3...\n");
-				
-				
-				
-				int source_port = inPacket.getPort();
-				System.out.println("4...\n");
-				//ports.add(source_port); //wywala tu
-				System.out.println("5...\n");
-				InetAddress source_address = inPacket.getAddress();
-				System.out.println("6...\n");
-				addresses.add(source_address.toString());
-				msg = new String(inPacket.getData(), 0, inPacket.getLength()); //przypisanie do zmiennej msg na serwerze - nawiazanie polaczenia
-				System.out.println(msg);
-
-				inBuf = new byte[10000];
-				inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie loginu
-				socket.receive(inPacket);
-				login = new String(inPacket.getData(), 0, inPacket.getLength());
-				logins.add(login);
-				
-				
-				
-				for(int i=0;i<logins.size();i++) {
-					user="Client - "+(String)logins.get(i)+" : "+(String)addresses.get(i)+":"+ports.get(i).toString();
-					System.out.println(user); //wyswietlanie listy klientow
-					users.add(user);
-				}
-				
-				inBuf = new byte[10000];
-				inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie loginu
-				socket.receive(inPacket);
-				String dir = new String(inPacket.getData(), 0, inPacket.getLength());
-				directories.add(dir);
-				
-				inBuf = new byte[100];
+				inBuf = new byte[BUFFERSIZE];
 				inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie wyboru do switcha
 				socket.receive(inPacket);
 				String ch = new String(inPacket.getData(), 0, inPacket.getLength());
-				int choice = new Integer(ch);
+				int choice = Integer.valueOf(ch);
 				
 				switch(choice) {
 				case 1:
-					sbuild = new StringBuilder();
-					rozm=users.size();
-					sbuild.append(rozm);
-					outBuf=(sbuild.toString()).getBytes();
+					//WSTAWKA DLA WIELU UZYTKOWNIKOW 
+
+
 					
-					outPacket = new DatagramPacket(outBuf, 0, outBuf.length, source_address,PORT); //wys�anie rozmiaru listy
-					socket.send(outPacket);
 					
-					for(int i=0;i<users.size();i++) {
-						oneuser=(String)users.get(i);
-						outBuf=oneuser.getBytes();
-						outPacket = new DatagramPacket(outBuf, 0, outBuf.length, source_address,PORT); //wys�anie uzytkownikow
-						socket.send(outPacket);
-					}
 					
-					inBuf = new byte[10000];
-					inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie wyboru uzytkownika
-					socket.receive(inPacket);
-					String chosen_user = new String(inPacket.getData(), 0, inPacket.getLength());
 					
-					for(int i=0;i<users.size();i++) {
-						if(logins.get(i).toString().contains(chosen_user.toString())) { //identyfikuje wybranego uzytkownika
-							chosen_address=addresses.get(i).toString();
-							chosen_port=ports.get(i).intValue();
-							chosen_dir=directories.get(i).toString();
-						}
-					}
 					
-					sbuild = new StringBuilder("");
-					sbuild.append(chosen_port);
 					
-					outBuf=chosen_address.getBytes();
-					outPacket = new DatagramPacket(outBuf, 0, outBuf.length, source_address,PORT); //wys�anie wybranego adresu
-					socket.send(outPacket);
 					
-					outBuf=(sbuild.toString()).getBytes();
-					outPacket = new DatagramPacket(outBuf, 0, outBuf.length, source_address,PORT); //wys�anie wybranego portu
-					socket.send(outPacket);
+					
+					
+					
 					
 					StringBuilder sb = new StringBuilder("\n");
-					String dirname=chosen_dir;
+					String dirname="D:/STUDIA/SEM6/LABSPEC"; //dir wybranego usera pozniej
 					File f1=new File(dirname);
 					File fl[]=f1.listFiles();
 					
@@ -158,10 +122,16 @@ public class Serwer {
 					inBuf = new byte[10000];
 					inPacket = new DatagramPacket(inBuf, inBuf.length);
 					socket.receive(inPacket);
-					String filename = new String(inPacket.getData(), 0, inPacket.getLength());
+					String filename = new String(inPacket.getData(), 0, inPacket.getLength()); //PRZYCHODZI NAZWA PLIKU
 					
 					System.out.println("Requested file: "+filename);
-					
+					int X=0;
+					for(int i=0; i<fl.length; i++) {
+						if(fl[i].getName()==filename) {
+							X=(int)fl[i].length();
+							outBuf=new byte[X];
+						}
+					}
 					boolean flis = false;
 					int index = -1;
 					sb = new StringBuilder("");
@@ -190,27 +160,51 @@ public class Serwer {
 							
 							//File Send Process, Independent
 							File ff = new File(fl[index].getAbsolutePath());
-							FileReader fr = new FileReader(ff);
-							BufferedReader brf = new BufferedReader(fr);
-							String s = null;
+							int filesize = (int)ff.length();
+							int packsize=(int) filesize/20;
+							int size_of_segment=60000;
+							byte[] segment = new byte[size_of_segment];
+							
+							//FileInputStream in = new FileInputStream(ff);
+							//in.read(filedata);
+							// fr = new FileReader(ff);
+							//BufferedReader brf = new BufferedReader(fr);
+							//String s = null;
+							//sb = new StringBuilder();
+							//while((s = brf.readLine())!=null) {
+							//	sb.append(s);
+							//}
+							//if(brf.readLine()==null) {
+							//	System.out.println("File Read Successful. Closing Socket.");
+							//}
+			
+							for(int i=0;i<20;i++) {
 							sb = new StringBuilder();
-							
-							while((s = brf.readLine())!=null) {
-								
-								sb.append(s);
-								
+				            DataInputStream input = new DataInputStream( new FileInputStream( ff ) );
+					        try {
+					        	byte[] DATASIZE = sb.toString().getBytes();
+					        	int DATASIZElenght=DATASIZE.length;
+					        	int size_of_data=0;
+					        	for(int j=0;i<DATASIZElenght;i++) {
+					        		size_of_data=size_of_data+DATASIZE[j];
+					        	}
+					        	while(size_of_data<size_of_segment) {
+					                    sb.append( Integer.toBinaryString( input.readByte() ) );
+					                    
+					                }
+					        	segment = (sb.toString()).getBytes();
+					        	outPacket = new DatagramPacket(segment, 0, segment.length, source_address, source_port);
+					        	socket.send(outPacket); 
+					        } 
+					        catch( EOFException eof ) {
+					        }
+					        catch( IOException e ) {
+					        	e.printStackTrace();
+					        }
+					        //outBuf = new byte[100000];
+							 
 							}
 							
-							if(brf.readLine()==null) {
-								
-								System.out.println("File Read Successful. Closing Socket.");
-								
-							}
-							
-							outBuf = new byte[100000];
-							outBuf = (sb.toString()).getBytes();
-							outPacket = new DatagramPacket(outBuf, 0, outBuf.length, source_address, source_port);
-							socket.send(outPacket);
 							
 						}
 						catch(IOException ioe) {
@@ -221,6 +215,14 @@ public class Serwer {
 					}
 				break;
 				case 2:
+					inBuf = new byte[1000];
+					inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie katalogu
+					socket.receive(inPacket);
+					String catalog = new String(inPacket.getData(), 0, inPacket.getLength());
+					System.out.println("Zapisano udostepniany katalog: "+catalog);
+					directories.add(catalog);
+				break;
+				case 3:
 					for(int i=0;i<users.size();i++) {
 						if(users.get(i).toString().contains(source_address.toString())) //usuwam obecnego uzytkownika 
 							users.remove(i);
@@ -230,7 +232,13 @@ public class Serwer {
 			}
 		}
 		catch(Exception e) {
-			System.out.println("ERROR\n");
+			System.out.println("ERROR!!!!\n");
 		}
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
 	}
 }
