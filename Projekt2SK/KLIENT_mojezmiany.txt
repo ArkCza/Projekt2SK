@@ -7,107 +7,64 @@ import java.util.Scanner;
 
 public class Klient {
 	public static void main(String[] args) {
-		
 		DatagramSocket socket = null;
 		DatagramPacket inPacket = null; //recieving packet
 		DatagramPacket outPacket = null; //sending packet
-		
 		byte[] inBuf, outBuf;
-		
 		String msg = null;
 		String login = null;
-		String oneuser = null, dir=null;
+		String oneuser = null;
 		String ch,rec,chosen_user,chosen_address,katalog;
-		
 		final int PORT = 50000;
-		
 		List<String> users = null;
-		
 		Scanner src = new Scanner(System.in);
-		
 		StringBuilder sbuild;
-		
 		int choice,rozm,chosen_port=0;
-		
-		while(true) {
-			try {
-				InetAddress address = InetAddress.getByName("127.0.0.1");
-				socket = new DatagramSocket();
-				
-				msg="a";
-				outBuf=msg.getBytes();
-				outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wyslanie pustego stringa
-				socket.send(outPacket);
-								
-				System.out.println("Wybierz swoj login:");
-				login=src.nextLine();
-				outBuf=login.getBytes();
-				outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wyslanie loginu
-				socket.send(outPacket);
-				
-				System.out.println("Wybierz udostepniany folder:");
-				dir=src.nextLine();
-				outBuf=login.getBytes();
-				outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wyslanie katalogu
-				socket.send(outPacket);
-				
-				
+		//while(true) {
+		try {
+			InetAddress address = InetAddress.getByName("127.0.0.1"); 
+			socket = new DatagramSocket();
+			socket.setBroadcast(true); //-------------------b-cast set
+			msg="connect";
+			outBuf=msg.getBytes();
+			outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wysłanie pustego stringa
+			socket.send(outPacket);
+			socket.setSoTimeout(1000);
+			
+			System.out.println("Choose your login:");
+			login=src.nextLine();
+			outBuf=login.getBytes();
+			outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wysłanie loginu
+			socket.send(outPacket);
+			while(true) {
 				System.out.println("MENU:");
-				System.out.println("1 -Uzytkownicy i pobieranie");
-				System.out.println("2 - Wyloguj i zamknij");
+				System.out.println("1 -Users and download");
+				System.out.println("2 - Choose your shared catalog");
+				System.out.println("3 - Log out and exit");
 				
-				//wysylam wybor dla switcha do serwera:
-				System.out.println("Wybierz pozycje z menu:");
+				//wysyłam wybor dla switcha do serwera:
+				System.out.println("Choose from menu:");
 				ch=src.nextLine();
 				
 				choice=Integer.valueOf(ch);
 				outBuf=ch.getBytes();
-				outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wyslanie wyboru
+				outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wysłanie wyboru
 				socket.send(outPacket);
-				
 				switch(choice) {
 				case 1:
-					inBuf = new byte[100];
-					inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie rozmiaru
-					socket.receive(inPacket);
-					rec = new String(inPacket.getData(), 0, inPacket.getLength());
-					rozm = new Integer(rec);
-					System.out.println("Lista uzytkownikow:\n");
 					
-					for(int i=0;i<rozm;i++) {
-						inBuf = new byte[1000];
-						inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie listy
-						socket.receive(inPacket);
-						oneuser = new String(inPacket.getData(), 0, inPacket.getLength());
-						users.add(oneuser);
-						System.out.println(oneuser+"\n");
-					}
+					//WSTAWKA DLA WIELU UZYTKOWNIKOW!!!!!!!!
+					///////////////////
 					
-					System.out.println("Wybierz uzytkownika: \n");
-					chosen_user=src.nextLine();
-					outBuf=chosen_user.getBytes();
-					outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wys�anie wyboru uzytkownika
-					socket.send(outPacket);
 					
-					inBuf = new byte[1000];
-					inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie adresu 
-					socket.receive(inPacket);
-					chosen_address = new String(inPacket.getData(), 0, inPacket.getLength());
 					
-					inBuf = new byte[1000];
-					inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie portu
-					socket.receive(inPacket);
-					String chosen_p = new String(inPacket.getData(), 0, inPacket.getLength());
-					
-					chosen_port = Integer.valueOf(chosen_p);
-
-					inBuf = new byte[1000];
+					inBuf = new byte[10000];
 					inPacket = new DatagramPacket(inBuf, inBuf.length);
 					socket.receive(inPacket);
-					
-					String data = new String(inPacket.getData(), 0, inPacket.getLength());
+					String data = new String(inPacket.getData(), 0, inPacket.getLength()); //LISTA PLIKÓW PRZYCHODZI //DO KLIENTA
 					//Printing file list
 					System.out.println(data);
+					
 					
 					//Send file name and download the specified files
 					String filename = src.nextLine();
@@ -115,36 +72,49 @@ public class Klient {
 					outPacket = new DatagramPacket(outBuf, 0, outBuf.length,address,PORT);
 					socket.send(outPacket);
 					data=new String(inPacket.getData(), 0, inPacket.getLength());
-					
+					CharSequence dataa=data;
 					if(data.endsWith("ERROR")) {
 						System.out.println("File does not exist");
 						socket.close();
 					}
 					else {
+						
 						try {
-							BufferedWriter pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename)));
-							pw.write(data);
-							pw.close();
+							for(int i=0;i<20;i++) {
+								BufferedWriter pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename)));
+								pw.write(data);
+								pw.close();
+							}
+						
 							System.out.println("File writing successful, closing socket");
-							
+							socket.close();
 						}
 						catch(IOException ioe) {
 							System.out.println("File error\n");
 							socket.close();
 						}
+						
+						
+							
 					}
-					
 				break;
 				case 2:
-					System.out.println("Wylogowywanie...");
+					System.out.println("Choose the shared catalog: \n");
+					katalog=src.nextLine();
+					outBuf=katalog.getBytes();
+					outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wysłanie katalogu
+					socket.send(outPacket);
+					break;
+				case 3:
+					System.out.println("Logging out...");
 					socket.close();
-				break;
+					System.exit(0);
 				}
-				
-			}
-			catch(Exception e) {
-				System.out.println("Network error, please try again.\n");
 			}
 		}
+		catch(Exception e) {
+			System.out.println("Network error, please try again.\n");
+		}
+			
 	}
 }
