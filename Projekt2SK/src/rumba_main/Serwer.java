@@ -4,6 +4,10 @@
 -Klient podaje udostępniany katalog
 -Serwer przechowuje liste klientów do niego podłączonych
 -Menu: lista klientów->wybór klienta->wybór pliku->pobiera lub wyloguj  (switch case)
+-Dodać enter do wysyłanych plików
+-Transfer plików na binarny
+-Przerobić początek na broadcast
+-
 */
 package rumba_main;
 
