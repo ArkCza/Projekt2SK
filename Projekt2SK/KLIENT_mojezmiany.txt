@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.util.List;
 import java.util.Scanner;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 public class Klient {
 	public static void main(String[] args) {
@@ -16,7 +18,10 @@ public class Klient {
 		String oneuser = null;
 		String ch,rec,chosen_user,chosen_address,katalog;
 		final int PORT = 50000;
+		
 		List<String> users = null;
+		List<String> logins = new ArrayList<String>();
+		
 		Scanner src = new Scanner(System.in);
 		StringBuilder sbuild;
 		int choice,rozm,chosen_port=0;
@@ -36,10 +41,18 @@ public class Klient {
 			outBuf=login.getBytes();
 			outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wysłanie loginu
 			socket.send(outPacket);
+			
+			System.out.println("Choose a directory you wish to share:");
+			katalog=src.nextLine();
+			outBuf=katalog.getBytes();
+			outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wysłanie katalogu
+			socket.send(outPacket);
+			
+			
 			while(true) {
 				System.out.println("MENU:");
-				System.out.println("1 -Users and download");
-				System.out.println("2 - Choose your shared catalog");
+				System.out.println("1 - File download");
+				System.out.println("2 - Show user list");
 				System.out.println("3 - Log out and exit");
 				
 				//wysyłam wybor dla switcha do serwera:
@@ -73,7 +86,7 @@ public class Klient {
 					socket.send(outPacket);
 					data=new String(inPacket.getData(), 0, inPacket.getLength());
 					CharSequence dataa=data;
-					if(data.endsWith("ERROR")) {
+					if(data.endsWith("ERROR!")) {
 						System.out.println("File does not exist");
 						socket.close();
 					}
@@ -86,8 +99,8 @@ public class Klient {
 								pw.close();
 							}
 						
-							System.out.println("File writing successful, closing socket");
-							socket.close();
+							System.out.println("File writing successful");
+							//socket.close();
 						}
 						catch(IOException ioe) {
 							System.out.println("File error\n");
@@ -99,11 +112,35 @@ public class Klient {
 					}
 				break;
 				case 2:
-					System.out.println("Choose the shared catalog: \n");
+					//System.out.println("Nic nie robie :) \n");
+					
+					
+					
+					inBuf = new byte[60000];
+					inPacket = new DatagramPacket(inBuf, inBuf.length); 
+					socket.receive(inPacket);
+					
+					ByteArrayInputStream bais = new ByteArrayInputStream(inPacket.getData());
+					DataInputStream in = new DataInputStream(bais);
+					
+					while (in.available() > 0) {
+						
+						String element = in.readUTF();
+						System.out.println(element);
+						
+					}
+							
+					
+					
+					//logins = new ArrayList<String>(inPacket.getData(), 0, inPacket.getLength());
+					//System.out.println("Uzytkownik: "+logins.get(0));
+					
+					/*
 					katalog=src.nextLine();
 					outBuf=katalog.getBytes();
 					outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wysłanie katalogu
 					socket.send(outPacket);
+					*/
 					break;
 				case 3:
 					System.out.println("Logging out...");

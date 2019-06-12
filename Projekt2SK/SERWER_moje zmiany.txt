@@ -2,7 +2,7 @@
 
 package rumba_main;
 
-
+import java.io.*;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -63,11 +63,25 @@ public class Serwer implements Runnable {
 			login = new String(inPacket.getData(), 0, inPacket.getLength());
 			logins.add(login);
 			
+			/*
 			for(int i=0;i<logins.size();i++) {
 				user="Client - "+(String)logins.get(i)+" : "+(String)addresses.get(i)+":"+50000;
 				System.out.println(user); //wyswietlanie listy klientow
 				users.add(user);
 			}
+			
+			*/
+			
+			inBuf = new byte[BUFFERSIZE];
+			inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie katalogu
+			socket.receive(inPacket);
+			String catalog = new String(inPacket.getData(), 0, inPacket.getLength());
+			//System.out.println("Zapisano udostepniany katalog: "+catalog);
+			directories.add(catalog);
+			
+			System.out.println("Zapisano udostepniany katalog: "+directories.get(0));
+			
+			
 			while(true) {
 				
 				
@@ -94,7 +108,7 @@ public class Serwer implements Runnable {
 					
 					
 					StringBuilder sb = new StringBuilder("\n");
-					String dirname="D:/STUDIA/SEM6/LABSPEC"; //dir wybranego usera pozniej
+					String dirname = directories.get(0); //dir wybranego usera pozniej
 					File f1=new File(dirname);
 					File fl[]=f1.listFiles();
 					
@@ -147,8 +161,8 @@ public class Serwer implements Runnable {
 					}
 					if(!flis){
 						
-						System.out.println("ERROR");
-						sb.append("ERROR");
+						System.out.println("ERROR!");
+						sb.append("ERROR!");
 						outBuf = (sb.toString()).getBytes();
 						outPacket = new DatagramPacket(outBuf, 0, outBuf.length, source_address, source_port);
 						socket.send(outPacket);
@@ -215,12 +229,29 @@ public class Serwer implements Runnable {
 					}
 				break;
 				case 2:
+					
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					DataOutputStream out = new DataOutputStream(baos);
+					for (String element : logins) {
+						
+						out.writeUTF(element);
+						
+					}
+					
+					
+					outBuf = baos.toByteArray();
+					outPacket = new DatagramPacket(outBuf, 0, outBuf.length, source_address, PORT);
+					socket.send(outPacket);
+					
+					/*
 					inBuf = new byte[1000];
 					inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie katalogu
 					socket.receive(inPacket);
 					String catalog = new String(inPacket.getData(), 0, inPacket.getLength());
 					System.out.println("Zapisano udostepniany katalog: "+catalog);
 					directories.add(catalog);
+					
+					*/
 				break;
 				case 3:
 					for(int i=0;i<users.size();i++) {
