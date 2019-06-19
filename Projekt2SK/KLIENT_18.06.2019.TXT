@@ -9,24 +9,28 @@ import java.util.ArrayList;
 
 public class Klient {
 	public static void main(String[] args) {
+		
 		DatagramSocket socket = null;
 		DatagramPacket inPacket = null; //recieving packet
 		DatagramPacket outPacket = null; //sending packet
 		byte[] inBuf, outBuf;
 		String msg = null;
 		String login = null;
-		String oneuser = null;
-		String ch,rec,chosen_user,chosen_address,katalog;
+		//String oneuser = null;
+		String ch, chosen_user, katalog;
+		//String rec, chosen_address;
 		final int PORT = 50000;
 		final int[] PORTS_CONN= {50001,50002,50003,50004,50005,50006,50007,50008,50009};
-		List<String> users = null;
-		List<String> logins = new ArrayList<String>();
+		//List<String> users = null;
+		//List<String> logins = new ArrayList<String>();
 		
 		Scanner src = new Scanner(System.in);
-		StringBuilder sbuild;
-		int choice,rozm,chosen_port=0;
+		//StringBuilder sbuild;
+		int choice=0;
+		//int rozm, chosen_port=0;
 		//while(true) {
 		try {
+			
 			InetAddress address = InetAddress.getByName("127.0.0.1"); 
 			socket = new DatagramSocket();
 			socket.setBroadcast(true); //-------------------b-cast set
@@ -60,10 +64,10 @@ public class Klient {
 			while(true) {
 				System.out.println("MENU:");
 				System.out.println("1 - File download");
-				System.out.println("2 - Show user list");
+				System.out.println("2 - Number of logged in users");
 				System.out.println("3 - Log out and exit");
 				
-				//wysyłam wybor dla switcha do serwera:
+				//wysylanie wyboru dla switcha do serwera:
 				System.out.println("Choose from menu:");
 				ch=src.nextLine();
 				
@@ -92,7 +96,7 @@ public class Klient {
 					String receivedlist = new String(inPacket.getData(), 0, inPacket.getLength());
 					System.out.println(receivedlist);
 					
-					System.out.println("Wybierz uzytkownika (nick na liscie): \n");
+					System.out.println("Choose a name from the list: \n");
 					chosen_user=src.nextLine();
 		    		   System.out.println("T");
 					outBuf=chosen_user.getBytes();
@@ -118,7 +122,7 @@ public class Klient {
 					inBuf = new byte[10000];
 					inPacket = new DatagramPacket(inBuf, inBuf.length);
 					socket.receive(inPacket);
-					String data = new String(inPacket.getData(), 0, inPacket.getLength()); //LISTA PLIKÓW PRZYCHODZI //DO KLIENTA
+					String data = new String(inPacket.getData(), 0, inPacket.getLength()); //LISTA PLIKÓW PRZYCHODZI DO KLIENTA
 					//Printing file list
 					System.out.println(data);
 					
@@ -173,7 +177,7 @@ public class Klient {
 						tmp = new String(inPacket.getData(), 0, inPacket.getLength());
 						sb.append(tmp+"\n");
 					}
-					System.out.println("Lista uzytkownikow: ");
+					System.out.println("Number of logged in users: ");
 					System.out.println(sb.toString());
 					/*
 					ByteArrayInputStream bais = new ByteArrayInputStream(inPacket.getData());
@@ -185,11 +189,6 @@ public class Klient {
 						System.out.println(element);
 						
 					}*/
-							
-					
-					
-					
-					
 					
 					//logins = new ArrayList<String>(inPacket.getData(), 0, inPacket.getLength());
 					//System.out.println("Uzytkownik: "+logins.get(0));

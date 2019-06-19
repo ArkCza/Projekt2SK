@@ -28,23 +28,29 @@ public class Serwer {
 	   final int[] PORTS_CONN= {50001,50002,50003,50004,50005,50006,50007,50008,50009};
        ExecutorService executorService = Executors.newFixedThreadPool(10);
        int usercounter=0;
+       
        List<String> usersAll = new ArrayList<String>();
        List<String> directoriesAll = new ArrayList<String>();
        List<String> loginsAll = new ArrayList<String>();
        
        while (true){
+    	   
     	   DatagramSocket socketConn = new DatagramSocket(PORT);
     	   DatagramPacket inPacketConn = null; //recieving packet
     	   DatagramPacket outPacketConn = null; //sending packet
     	   byte[] inBufConn, outBufConn;
+    	   
     	   System.out.println("\nRunningAll...\n");
+    	   
     	   inBufConn = new byte[5000];
     	   inPacketConn = new DatagramPacket(inBufConn, inBufConn.length); //odebranie pustego stringa
     	   socketConn.receive(inPacketConn);
     	   String ifconn = new String(inPacketConn.getData(), 0, inPacketConn.getLength());
     	   System.out.println("\nRequest: "+ifconn+"\n");
+    	   
     	   //int usercounter=0;
     	   if(ifconn.equals("")) {
+    		   
     		   usercounter+=1;
     		   System.out.println(usercounter);
     		   InetAddress source_address_C = inPacketConn.getAddress();
@@ -55,7 +61,6 @@ public class Serwer {
         	   socketConn.receive(inPacketConn);
         	   String loginAll = new String(inPacketConn.getData(), 0, inPacketConn.getLength());
     		   loginsAll.add(loginAll);
-        	   
         	   
         	   String useroneall=usercounter+" Client - "+loginAll+" : "+source_address_C+":"+source_port_C;
         	   usersAll.add(useroneall);
@@ -82,11 +87,12 @@ public class Serwer {
 	            	   	DatagramPacket inPacket = null; //recieving packet
 	              		DatagramPacket outPacket = null; //sending packet
 	              		byte[] inBuf, outBuf;
-	              		String msg,user,chosen_address="",chosen_dir="",login,oneuser,reponse="";
-	              		int chosen_port=0,rozm;
-	              		List<Integer> ports = new ArrayList<Integer>();
-	              		List<String> logins = new ArrayList<String>();
-	              		List<String> addresses = new ArrayList<String>();
+	              		//String msg,user,chosen_address="",chosen_dir="",login,oneuser,reponse="";
+	              		String chosen_dir="", oneuser;
+	              		//int chosen_port=0,rozm;
+	              		//List<Integer> ports = new ArrayList<Integer>();
+	              		//List<String> logins = new ArrayList<String>();
+	              		//List<String> addresses = new ArrayList<String>();
 	              		//List<String> users = new ArrayList<String>();
 	              		//List<String> directories = new ArrayList<String>();
 	              		
@@ -116,18 +122,14 @@ public class Serwer {
 		           			Integer sport = Integer.valueOf(source_port);
 	           				login = new String(inPacket.getData(), 0, inPacket.getLength());
 	           				logins.add(login);*/
-	           				
-	           				
-	           			
+
 	           			
 	           			//for(int i=0;i<logins.size();i++) {
 	           			//	user=howmanyusers+" Client - "+login+" : "+source_address_C+":"+source_port_C;
 	           			//	//System.out.println(user); //wyswietlanie listy klientow
 	           			//	users.add(user);
 	           			//}
-	           			
-	           			
-	           			
+
 	           				/*inBuf = new byte[BUFFERSIZE];
 	           				inPacket = new DatagramPacket(inBuf, inBuf.length); //odebranie katalogu
 	           				socket.receive(inPacket);
@@ -136,7 +138,6 @@ public class Serwer {
 	           				directoriesAll.add(catalog);
 	           			
 	           				System.out.println("Zapisano udostepniany katalog: "+directoriesAll.get(directoriesAll.size()-1));*/
-	           			
 	           			
 	           			while(true) {
 	           				inBuf = new byte[BUFFERSIZE];
@@ -193,11 +194,7 @@ public class Serwer {
 	        					
 	        					outBuf=(sbuild.toString()).getBytes();
 	        					outPacket = new DatagramPacket(outBuf, 0, outBuf.length, source_address,source_port); //wys?anie wybranego portu
-	        					socket.send(outPacket);*/
-	        					
-	           					
-	           					
-	           					
+	        					socket.send(outPacket);*/			
 	           					
 	           					StringBuilder sb = new StringBuilder("\n");
 	           					String dirname = chosen_dir; //dir wybranego usera pozniej
