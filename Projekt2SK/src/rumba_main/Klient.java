@@ -27,20 +27,20 @@ public class Klient {
 			socket.setBroadcast(true); //-------------------b-cast set
 			msg="";
 			outBuf=msg.getBytes();
-			outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wysłanie prosby o polaczenie
+			outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wysĹ‚anie prosby o polaczenie
 			socket.send(outPacket);
 			socket.setSoTimeout(1000);
 			
 			System.out.println("Choose your login:");
 			login=src.nextLine();
 			outBuf=login.getBytes();
-			outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wysłanie loginu
+			outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wysĹ‚anie loginu
 			socket.send(outPacket);
 			
-			System.out.println("Choose a directory you wish to share:");
+			System.out.println("Choose a directory you wish to share (for example on Windows C:\\\\Users\\\\ or on Linux /media/):");
 			katalog=src.nextLine();
 			outBuf=katalog.getBytes();
-			outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wysłanie katalogu
+			outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,PORT); //wysĹ‚anie katalogu
 			socket.send(outPacket);
 			
 			inBuf = new byte[10000];
@@ -49,7 +49,7 @@ public class Klient {
 			String whichport = new String(inPacket.getData(), 0, inPacket.getLength()); //odebranie na ktory port wysylac
 			int whichportchoice = Integer.valueOf(whichport);
 			int NEWPORT=PORTS_CONN[whichportchoice];
-			System.out.println("Connecting to "+NEWPORT);
+			System.out.println("Connecting to PORT "+NEWPORT+"\n");
 			
 			
 			while(true) {
@@ -64,7 +64,7 @@ public class Klient {
 				
 				choice=Integer.parseInt(ch);
 				outBuf=ch.getBytes();
-				outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,NEWPORT); //wysłanie wyboru
+				outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,NEWPORT); //wysĹ‚anie wyboru
 				socket.send(outPacket);
 				switch(choice) {
 				case 1:
@@ -75,16 +75,16 @@ public class Klient {
 					String receivedlist = new String(inPacket.getData(), 0, inPacket.getLength());
 					System.out.println(receivedlist);
 					
-					System.out.println("Choose a name from the list: \n");
+					System.out.println("Choose a client name from the list:");
 					chosen_user=src.nextLine();
 					outBuf=chosen_user.getBytes();
-					outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,NEWPORT); //wysłanie wyboru uzytkownika
+					outPacket = new DatagramPacket(outBuf, 0, outBuf.length, address,NEWPORT); //wysĹ‚anie wyboru uzytkownika
 					socket.send(outPacket);	
 					
 					inBuf = new byte[10000];
 					inPacket = new DatagramPacket(inBuf, inBuf.length);
 					socket.receive(inPacket);
-					String data = new String(inPacket.getData(), 0, inPacket.getLength()); //LISTA PLIKÓW PRZYCHODZI DO KLIENTA
+					String data = new String(inPacket.getData(), 0, inPacket.getLength()); //LISTA PLIKĂ“W PRZYCHODZI DO KLIENTA
 					//Printing file list
 					System.out.println(data);
 					
@@ -94,31 +94,53 @@ public class Klient {
 					outBuf = filename.getBytes();
 					outPacket = new DatagramPacket(outBuf, 0, outBuf.length,address,NEWPORT);
 					socket.send(outPacket);
-					data=new String(inPacket.getData(), 0, inPacket.getLength());
-
-					if(data.endsWith("ERROR!")) {
+					
+					//Recieve number of packets
+					inBuf = new byte[10000];
+					inPacket = new DatagramPacket(inBuf, inBuf.length);
+					socket.receive(inPacket);
+					String rcv = new String(inPacket.getData(), 0, inPacket.getLength());
+					double no_of_pkt = Double.parseDouble(rcv);
+					
+					
+					//Receive file
+					FileOutputStream fos = new FileOutputStream(filename);
+					StringBuilder sb1 = new StringBuilder();
+					BufferedOutputStream bos = new BufferedOutputStream(fos);
+					
+					for(double i=0; i <= no_of_pkt; i++) {
+						
+						byte [] b = new byte[1024];
+						bos.write(b, 0, b.length);
+						System.out.println("Packet: " + (i+1));
+						inPacket = new DatagramPacket(b, b.length);
+						socket.receive(inPacket);
+						String file = new String(inPacket.getData(), 0, inPacket.getLength());
+						sb1.append(file);
+						Thread.sleep(10L);
+						
+					}
+					
+					data = sb1.toString();
+					
+					if(data.endsWith("ERROR")) {
 						System.out.println("File does not exist");
 						socket.close();
 					}
 					else {
-						
 						try {
-							for(int i=0;i<20;i++) {
-								BufferedWriter pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename)));
-								pw.write(data);
-								pw.close();
-							}
-						
-							System.out.println("File writing successful");
-							//socket.close();
+							BufferedWriter pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename)));
+							pw.write(data);
+							//Force write buffer to file
+							pw.close();
+							
+							System.out.println("FIle writing successful");
+							
 						}
 						catch(IOException ioe) {
 							System.out.println("File error\n");
 							socket.close();
 						}
-						
-						
-							
 					}
 				break;
 				case 2:
