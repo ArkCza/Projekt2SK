@@ -2,10 +2,13 @@ package rumba_main;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -21,6 +24,9 @@ public class Serwer {
 	   final int[] PORTS_CONN= {50001,50002,50003,50004,50005,50006,50007,50008,50009};
        ExecutorService executorService = Executors.newFixedThreadPool(10);
        int usercounter=0;
+       
+       
+       int size = 1024;
        
        List<String> usersAll = new ArrayList<String>();
        List<String> directoriesAll = new ArrayList<String>();
@@ -44,7 +50,7 @@ public class Serwer {
     	   if(ifconn.equals("")) {
     		   
     		   usercounter+=1;
-    		   System.out.println(usercounter);
+    		   System.out.println("User count = "+usercounter);
     		   InetAddress source_address_C = inPacketConn.getAddress();
     		   int source_port_C = inPacketConn.getPort();
     		   
@@ -54,7 +60,7 @@ public class Serwer {
         	   String loginAll = new String(inPacketConn.getData(), 0, inPacketConn.getLength());
     		   loginsAll.add(loginAll);
         	   
-        	   String useroneall=usercounter+" Client - "+loginAll+" : "+source_address_C+":"+source_port_C;
+        	   String useroneall=usercounter+" Client name - "+loginAll+"\n ADDRESS:PORT : "+source_address_C+":"+source_port_C;
         	   usersAll.add(useroneall);
         	   System.out.println("User "+loginAll+" saved.\n");
         	   
@@ -105,7 +111,7 @@ public class Serwer {
 	        						
 	        					}
 	        					outBuf=(sbuild.toString()).getBytes();
-        						outPacket = new DatagramPacket(outBuf, 0, outBuf.length, source_address_C,source_port_C); //wys?anie uzytkownikow
+        						outPacket = new DatagramPacket(outBuf, 0, outBuf.length, source_address_C,source_port_C); //wyslanie uzytkownikow
         						socket.send(outPacket);
         						
 	        					inBuf = new byte[BUFFERSIZE];
@@ -190,39 +196,39 @@ public class Serwer {
 	           						
 	           						try {
 	           							
-	           							//File Send Process, Independent
+	           						//File Send Process, Independent
 	           							File ff = new File(fl[index].getAbsolutePath());
-	           							int size_of_segment=60000;
-	           							byte[] segment = new byte[size_of_segment];
-	           			
-	           							for(int i=0;i<20;i++) {
-	           							sb = new StringBuilder();
-	           				            DataInputStream input = new DataInputStream( new FileInputStream( ff ) );
-	           					        try {
-	           					        	byte[] DATASIZE = sb.toString().getBytes();
-	           					        	int DATASIZElenght=DATASIZE.length;
-	           					        	int size_of_data=0;
-	           					        	for(int j=0;i<DATASIZElenght;i++) {
-	           					        		size_of_data=size_of_data+DATASIZE[j];
-	           					        	}
-	           					        	while(size_of_data<size_of_segment) {
-	           					                    sb.append( Integer.toBinaryString( input.readByte() ) );
-	           					                    
-	           					                }
-	           					        	segment = (sb.toString()).getBytes();
-	           					        	outPacket = new DatagramPacket(segment, 0, segment.length, source_address_C, source_port_C);
-	           					        	socket.send(outPacket); 
-	           					        } 
-	           					        catch( EOFException eof ) {
-	           					        }
-	           					        catch( IOException e ) {
-	           					        	e.printStackTrace();
-	           					        }
-	           							 
+	           							
+	           							double no_of_pkt = Math.ceil(((int) ff.length()) / size);
+	           							
+	           							byte [] snd = new byte[1024];
+	           							String f = String.valueOf(no_of_pkt);
+	           							snd = f.getBytes();
+	           							outPacket = new DatagramPacket(snd, snd.length, source_address_C, source_port_C);
+	           							socket.send(outPacket);
+	           						
+	           							
+	           							FileInputStream fis = new FileInputStream(ff);
+	           							BufferedInputStream bis = new BufferedInputStream(fis);
+	           							
+	           							for(double i=0; i <= no_of_pkt; i++) {
+	           								
+	           								byte [] b = new byte[size];
+	           								bis.read(b, 0, b.length);
+	           								System.out.println("Packet: " + (i+1));
+	           								outPacket = new DatagramPacket(b, b.length, source_address_C, source_port_C);
+	           								socket.send(outPacket);
+	           								try {
+												Thread.sleep(10L);
+											} catch (InterruptedException e) {
+												
+												e.printStackTrace();
+											}
+	           								
 	           							}
 	           							
-	           							
 	           						}
+
 	           						catch(IOException ioe) {
 	           							
 	           							System.out.println(ioe);
